@@ -20,6 +20,11 @@ Master *controller* untuk memandu pengembangan UI/UX dan eksekusi kode *Frontend
 ## Validasi Gate Masuk (Wajib)
 Sebelum memanggil Fase 1 (e-ui-designer), WAJIB periksa apakah docs/product/SPEC.md sudah final. Dilarang mendesain UI tanpa Product Requirements Document (PRD). Sebelum memanggil Fase 3 (e-task-builder), WAJIB periksa apakah docs/tech-spec/backend-api.md sudah ada. Dilarang merancang kodingan frontend sebelum endpoint Backend tersedia (karena UI harus mengkonsumsi API tersebut).
 
+> **Jika docs/product/SPEC.md atau docs/tech-spec/backend-api.md BELUM ADA** dan ini adalah proyek existing (bukan proyek baru):
+> -> HENTIKAN proses dan arahkan pengguna untuk menjalankan **`legacy-decoder`** terlebih dahulu.
+> -> `legacy-decoder` akan merekonstruksi semua dokumen yang dibutuhkan langsung dari kode yang ada.
+> -> Setelah `legacy-decoder` selesai dan semua dokumen disetujui pengguna, baru kembali ke `frontend-orchestrator`.
+
 ---
 
 ## Peta Sub-Skill Frontend (Wajib Sesuai Urutan)

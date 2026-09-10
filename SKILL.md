@@ -31,12 +31,24 @@ Master *controller* yang menyatukan **PRD → Database → Backend → Frontend 
 │              (Skill ini — Titik Masuk Utama)                 │
 └──────────────────────┬───────────────────────────────────────┘
                        │
-          ┌────────────▼────────────┐
-          │     PRD ORCHESTRATOR    │  ← Fondasi semua keputusan
-          │   (prd-orchestrator)    │
-          └─┬──────┬──────┬────────┘
-            │      │      │
-   ┌─────────▼──┐ ┌─▼──────────┐ ┌▼──────────────┐
+          ┌────────────▼────────────┐     ┌──────────────────────────┐
+          │     PRD ORCHESTRATOR    │     │    LEGACY DECODER  🔍    │
+          │   (prd-orchestrator)    │     │   (legacy-decoder)       │
+          │  ← Proyek BARU          │     │  ← Proyek EXISTING       │
+          └─┬──────┬──────┬────────┘     │  tanpa dokumentasi       │
+            │      │      │              └──────────┬───────────────┘
+            │      │      │                         │ (menghasilkan)
+            │      │      │              ┌──────────▼───────────────┐
+            │      │      │              │  docs/product/SPEC.md    │
+            │      │      │              │  docs/tech-spec/         │
+            │      │      │              │    backend-api.md        │
+            │      │      │              │    database.md           │
+            │      │      │              │  docs/PROJECT-CONTEXT.md │
+            │      │      │              └──────────┬───────────────┘
+            │      │      │                         │ (setelah approval)
+            └──────┴──────┴─────────────────────────┘
+                          │
+   ┌──────────▼──┐ ┌─▼──────────┐ ┌▼──────────────┐
    │  DATABASE  │ │  BACKEND   │ │   FRONTEND    │
    │Orchestrator│ │Orchestrator│ │  Orchestrator │
    │(database-  │ │(backend-   │ │(frontend-     │
@@ -82,6 +94,12 @@ Master *controller* yang menyatukan **PRD → Database → Backend → Frontend 
 | `dp-eksekutor-infra` | `DP-Workers/dp-eksekutor-infra/` | Kuli Koding Docker/Nginx/CI |
 | `qa-standar-kualitas` | `qa-standar-kualitas/` | 🛡️ Polisi Kualitas Lintas Tim |
 | `parallel-executor` | `parallel-executor/` | ⚡ Manajer Sub-Agent Eksekusi (Paralel & Sekuensial) |
+| `legacy-decoder` | `legacy-decoder/` | 🔍 Orchestrator Analisis Proyek Existing |
+| `legacy-discovery` | `LEGACY-Workers/legacy-discovery/` | Scan stack, folder, dan dependency proyek existing |
+| `legacy-mapping` | `LEGACY-Workers/legacy-mapping/` | Peta arsitektur internal & alur request |
+| `legacy-api-extractor` | `LEGACY-Workers/legacy-api-extractor/` | Rekonstruksi kontrak API dari kode router/controller |
+| `legacy-db-reverse` | `LEGACY-Workers/legacy-db-reverse/` | Rekonstruksi skema database dari migration/ORM |
+| `legacy-spec-writer` | `LEGACY-Workers/legacy-spec-writer/` | Merge/tulis SPEC.md + PROJECT-CONTEXT.md |
 
 ---
 
@@ -194,7 +212,27 @@ Setiap kali Anda mendelegasikan tugas, AI eksekutor WAJIB mendeklarasikan:
 7. dp-eksekutor-infra (staging → production)
 ```
 
-### Skenario 2: Fitur Baru pada Proyek Berjalan
+### Skenario 2: Proyek Existing Tanpa Dokumentasi (Legacy)
+```text
+Gunakan ini jika proyek sudah berjalan tapi tidak ada docs/tech-spec/ atau
+docs/product/SPEC.md sudah outdated.
+
+1. legacy-decoder → (orchestrator, validasi path proyek)
+     → legacy-discovery    : identifikasi tech stack & dependency
+     → legacy-mapping      : peta arsitektur & alur request
+     → legacy-api-extractor: rekonstruksi docs/tech-spec/backend-api.md
+     → legacy-db-reverse   : rekonstruksi docs/tech-spec/database.md
+     → legacy-spec-writer  : merge/buat docs/product/SPEC.md +
+                             docs/PROJECT-CONTEXT.md
+2. [USER APPROVAL FINAL atas semua dokumen]
+3. Lanjut ke pipeline yang sesuai tujuan:
+   → Redesain UI      : frontend-orchestrator
+   → Tambah fitur API : backend-orchestrator
+   → Perubahan skema  : database-orchestrator
+   → Semua domain     : kembali ke Skenario 1 (Fase 2 dst)
+```
+
+### Skenario 3: Fitur Baru pada Proyek Berjalan
 ```text
 1. prd-orchestrator → Mini-spec (approval)
 2. Update Tech-Spec domain yang terpengaruh
